@@ -213,6 +213,22 @@ RCT_EXPORT_METHOD(completeCheckout:(NSDictionary *)cardDictionary resolver:(RCTP
     }];
 }
 
+RCT_EXPORT_METHOD(login:(NSString *)email password:(NSString *)password resolver:(RCTPromiseResolveBlock)resolve
+    rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSArray *credentialItems = @[[BUYAccountCredentialItem itemWithEmail:email],
+                                 [BUYAccountCredentialItem itemWithPassword:password]];
+    BUYAccountCredentials *accountCredentials =  [BUYAccountCredentials credentialsWithItems:credentialItems];
+    [self.client loginCustomerWithCredentials:accountCredentials callback:^(BUYCustomer * _Nullable customer, BUYCustomerToken * _Nullable token, NSError * _Nullable error) {
+        if (customer && token && !error) {
+            resolve([customer JSONDictionary]);
+        }
+        else{
+            return reject(@"", [self getJsonFromError:error], error);
+        }
+    }];
+}
+
 #pragma mark - BUYPaymentProvider delegate implementation -
 
 - (void)paymentProvider:(id<BUYPaymentProvider>)provider wantsControllerPresented:(UIViewController *)controller
